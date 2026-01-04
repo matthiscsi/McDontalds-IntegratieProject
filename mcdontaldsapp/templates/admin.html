@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portaal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Admin Portaal</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Beschrijving</th>
+                    <th>Prijs (€)</th>
+                    <th>Status</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.description }}</td>
+                    <td>
+                        <form action="{{ url_for('update_product', product_id=product.id) }}" method="POST" style="display:inline;">
+                            <input type="text" name="price" value="{{ "%.2f"|format(product.price) }}" size="5">
+                            <button type="submit">💾</button>
+                        </form>
+                    </td>
+                    <td>
+                        {% if product.in_stock %}
+                            <span class="in-stock">Op voorraad</span>
+                        {% else %}
+                            <span class="out-stock">Uitverkocht</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('update_product', product_id=product.id) }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="toggle_stock" value="1">
+                            <button type="submit">
+                                {% if product.in_stock %}❌ Markeer Uitverkocht{% else %}✅ Zet op Voorraad{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="navigation">
+            <button class="btn-back" type="button" onclick="window.location.href='{{ url_for('landing') }}'">
+                <span class="back-arrow">←</span>
+                <span>Terug naar Home</span>
+            </button>
+        </div>
+
+    </div>
+</body>
+</html>

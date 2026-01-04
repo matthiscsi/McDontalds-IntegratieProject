@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDontald's - Menu Kiosk</title>
+    <link rel="stylesheet" href="../static/menu.css">
+</head>
+<body>
+    <div class="decorative-element top-left"></div>
+    <div class="decorative-element bottom-right"></div>
+
+    <div class="header">
+        <div class="mcdonalds-logo">
+            <div class="golden-arches">M</div>
+        </div>
+        <div class="header-content">
+            <h1>Hey there!</h1>
+            <p>What's Your Craving?</p>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="sidebar">
+            {% for cat in categories %}
+            <div class="category-item {% if loop.first %}active{% endif %}" data-category="{{ cat.slug }}">
+                <div class="category-icon">
+                    {% if cat.icon and cat.icon.startswith('/static') %}
+                        <img src="{{ cat.icon }}" alt="{{ cat.name }}">
+                    {% else %}
+                        {{ cat.icon or '📁' }}
+                    {% endif %}
+                </div>
+                <div class="category-text">{{ cat.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="menu-container">
+            <div class="menu-section active" id="home">
+                <h2>Home</h2>
+
+                {% for item in items if item.featured %}
+                <div class="menu-item home-featured {% if not item.in_stock %}unavailable{% endif %}">
+                    <div class="menu-item-image">
+                        {% if item.image and item.image.startswith('/static') %}
+                            <img src="{{ item.image }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; border-radius: 12px;">
+                        {% else %}
+                            {{ item.image or '🍔' }}
+                        {% endif %}
+                    </div>
+                    <div class="menu-item-content">
+                        <h3>{{ item.name }}</h3>
+                        <p>{{ item.description }}</p>
+                        <div class="menu-item-price">
+                            <span class="price">€{{ '%.2f'|format(item.price) }}</span>
+                            {% if item.in_stock %}
+                                <button class="add-btn" onclick="addToCart('{{ item.name }}', {{ item.price }})">Order Now</button>
+                            {% else %}
+                                <span class="unavailable-label">Not Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="home-category-grid">
+                    {% for cat in categories if cat.slug not in ['home'] %}
+                    <div class="home-category" onclick="showCategory('{{ cat.slug }}')">
+                        <div class="home-category-icon">
+                            {% if cat.icon and cat.icon.startswith('/static') %}
+                                <img src="{{ cat.icon }}" alt="{{ cat.name }}">
+                            {% else %}
+                                {{ cat.icon or '📁' }}
+                            {% endif %}
+                        </div>
+                        <h3>{{ cat.name }}</h3>
+                        <p>Discover {{ cat.name }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% for cat in categories if cat.slug != 'home' %}
+            <div class="menu-section" id="{{ cat.slug }}">
+                <h2>{{ cat.name }}</h2>
+                <div class="menu-items-grid">
+                    {% for item in cat.items %}
+                    <div class="menu-item {% if not item.in_stock %}unavailable{% endif %}">
+                        <div class="menu-item-image">
+                            {% if item.image and item.image.startswith('/static') %}
+                                <img src="{{ item.image }}" alt="{{ item.name }}" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; border-radius: 12px;">
+                            {% else %}
+                                {{ item.image or '🍔' }}
+                            {% endif %}
+                        </div>
+                        <div class="menu-item-content">
+                            <h3>{{ item.name }}</h3>
+                            <p>{{ item.description }}</p>
+                            <div class="menu-item-price">
+                                <span class="price">€{{ '%.2f'|format(item.price) }}</span>
+                                {% if item.in_stock %}
+                                    <button class="add-btn" onclick="addToCart('{{ item.name }}', {{ item.price }})">Add</button>
+                                {% else %}
+                                    <span class="unavailable-label">Not Available</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+    
+    <div class="cart-section">
+        <div class="cart-info">
+            <div class="cart-icon">
+                <img src="/static/images/cart.png" alt="Cart" style="width: 32px; height: 32px;">
+            </div>
+            <div class="cart-details">
+                <h4>Your Order</h4>
+                <p id="cart-summary">0 items • €0,00</p>
+            </div>
+        </div>
+        <button class="btn-checkout" id="checkout-btn" disabled>
+            Checkout Total
+        </button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+
+<div class="chatbot-button" id="chatbot-btn" onclick="toggleChat()">
+    <div class="fat-tummy-icon">
+        <div class="tummy-face">
+            <div class="tummy-eyes">
+                <span class="eye">◕</span>
+                <span class="eye">◕</span>
+            </div>
+            <div class="tummy-mouth">ᴗ</div>
+        </div>
+        <div class="tummy-belly"></div>
+    </div>
+</div>
+
+<div class="chatbot-window" id="chatbot-window">
+    <div class="chatbot-header">
+        <div class="chatbot-header-content">
+            <div class="fat-tummy-avatar">
+                <div class="tummy-face-small">
+                    <div class="tummy-eyes-small">
+                        <span class="eye-small">◕</span>
+                        <span class="eye-small">◕</span>
+                    </div>
+                    <div class="tummy-mouth-small">ᴗ</div>
+                </div>
+            </div>
+            <div>
+                <h3>Fat Tummy</h3>
+                <p>Your McDontald's Menu Expert</p>
+            </div>
+        </div>
+        <button class="close-chat" onclick="toggleChat()">✕</button>
+    </div>
+    
+    <div class="chatbot-messages" id="chatbot-messages">
+        <div class="bot-message">
+            <div class="message-bubble">
+                Hey! I'm Fat Tummy 🍔 Ask me anything about our menu, allergens, prices or recommendations!
+            </div>
+        </div>
+    </div>
+    
+    <div class="chatbot-input-area">
+        <input 
+            type="text" 
+            id="chatbot-input" 
+            placeholder="Ask Fat Tummy about the menu..." 
+            onkeypress="if(event.key === 'Enter') sendMessage()"
+        >
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDontald's - Home</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="hero-section">
+        <div class="decorative-element"></div>
+        
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <div class="status-bar">
+                    <div class="time">9:41</div>
+                    <div class="battery">
+                        <span>67%</span>
+                        <div class="battery-icon">
+                            <div class="battery-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-header">
+                    <div class="mcdonalds-logo">
+                        <div class="golden-arches">M</div>
+                    </div>
+                    <div class="profile-icon">👤</div>
+                </div>
+                
+                <div class="rewards-section">
+                    <div class="get-rewarded-text">
+                        <h1>Get<br>Rewarded</h1>
+                    </div>
+                    <div class="points-display">
+                        <span>1,250 points</span>
+                    </div>
+                    <div class="food-image"></div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-tabs">
+                        <div class="menu-tab active">Menu</div>
+                        <div class="menu-tab">Deals</div>
+                        <div class="menu-tab">Rewards</div>
+                    </div>
+
+                    <div class="menu-products">
+                        <div class="product-card" id="secret-bigmac">
+                            <img src="/static/images/big_mac.png" alt="Big Mac">
+                            <h3>Big Mac</h3>
+                            <p>€5,99</p>
+                        </div>
+                        <div class="product-card">
+                            <img src="/static/images/largefry.png" alt="Fries">
+                            <h3>Fries</h3>
+                            <p>€2,99</p>
+                        </div>
+                        <div class="product-card" id="secret-cola">
+                            <img src="/static/images/coca_cola.png" alt="Coca Cola">
+                            <h3>Coca Cola</h3>
+                            <p>€1,99</p>
+                        </div>
+                        <div class="product-card">
+                            <img src="/static/images/nuggets.png" alt="Nuggets">
+                            <h3>Nuggets</h3>
+                            <p>€3,49</p>
+                        </div>
+                        <div class="product-card">
+                            <img src="/static/images/mcflurry.png" alt="McFlurry">
+                            <h3>McFlurry</h3>
+                            <p>€2,49</p>
+                        </div>
+                        <div class="product-card">
+                            <img src="/static/images/categories/snacks.png" alt="Salad">
+                            <h3>Salad</h3>
+                            <p>€3,99</p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div class="bottom-nav">
+                    <div class="nav-item active">
+                        <img src="/static/images/categories/deals.png" alt="Home" class="nav-icon">
+                        <div>Home</div>
+                    </div>
+                    <div class="nav-item">
+                        <img src="/static/images/categories/sandwiches.png" alt="Menu" class="nav-icon">
+                        <div>Menu</div>
+                    </div>
+                    <div class="nav-item">
+                        <img src="/static/images/categories/deals.png" alt="Deals" class="nav-icon">
+                        <div>Deals</div>
+                    </div>
+                    <div class="nav-item">
+                        <img src="/static/images/categories/home.png" alt="Profile" class="nav-icon">
+                        <div>Profile</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="content-grid">
+            <div class="left-content">
+                <h2>Extra Benefits</h2>
+                <div class="app-icon">
+                    <img src="/static/images/benefits.png" alt="Benefits">
+                </div>
+                <p>Download the McDontald's app for exclusive offers and rewards</p>
+            </div>
+            
+            <div class="right-content kiosk-style">
+                <div class="kiosk-panel">
+                    <button class="btn-start" type="button" aria-label="Start order" onclick="window.location.href='{{ url_for('dinein') }}'">
+                        <span class="title">Start Order</span>
+                        <span class="subtitle">Continue without logging in</span>
+                    </button>
+
+                    <div class="kiosk-row">
+                        <button class="btn-secondary" type="button" aria-label="Choose languages">
+                            <img src="/static/images/languages.png" alt="Languages" class="icon">
+                            <span class="label">Languages</span>
+                        </button>
+
+                        <button class="btn-secondary" type="button" aria-label="Info">
+                            <img src="/static/images/info.png" alt="Info" class="icon">
+                            <span class="label">Info</span>
+                        </button>
+                    </div>
+
+                    <p class="kiosk-note">
+                        2,000 calories a day is a general guideline; additional nutritional information available upon request.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="language-popup" class="popup hidden">
+        <div class="popup-content">
+            <h2 style="color: #333; margin-bottom: 1.5rem;">Language Support</h2>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; border: 2px solid #e9edf2;">
+                <p style="font-size: 1.1rem; color: #333; margin-bottom: 1rem; font-weight: 600;">
+                    We're a one-language operation here!
+                </p>
+                <p style="color: #666; line-height: 1.6;">
+                    Supporting multiple languages is hard work, and honestly? We'd rather spend that time perfecting our fries recipe. 
+                    Besides, everyone speaks the universal language of delicious burgers anyway.
+                </p>
+            </div>
+            <div style="text-align: left; margin: 1rem 0;">
+                <p style="color: #999; font-size: 0.9rem; font-style: italic;">
+                    Fun fact: "Mmmmm" sounds exactly the same in all 7,000+ languages worldwide.
+                </p>
+            </div>
+            <button class="btn-close">I Understand (Unfortunately)</button>
+        </div>
+    </div>
+
+    <div id="info-popup" class="popup hidden">
+        <div class="popup-content" style="max-width: 500px;">
+            <h2 style="color: #333; margin-bottom: 1rem;">About This Masterpiece</h2>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 2px solid #e9edf2;">
+                <h3 style="color: #333; margin: 0 0 0.5rem 0; font-size: 1.2rem;">McDontald's Kiosk System</h3>
+                <p style="color: #666; margin: 0; font-size: 0.95rem;">
+                    Because regular McDonald's was too mainstream.
+                </p>
+            </div>
+
+            <div style="text-align: left; margin: 1.5rem 0;">
+                <h4 style="color: #333; margin: 0 0 1rem 0; font-size: 1.1rem; border-bottom: 2px solid #e9edf2; padding-bottom: 0.5rem;">
+                    What We've Got:
+                </h4>
+                <ul style="color: #666; line-height: 2; list-style: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong style="color: #333;">Complete Ordering System</strong><br>
+                        <span style="font-size: 0.9rem;">Add to cart, checkout, pretend to pay</span>
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong style="color: #333;">Multiplayer Snake Game</strong><br>
+                        <span style="font-size: 0.9rem;">Because waiting for food should be fun</span>
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong style="color: #333;">AI Chatbot</strong><br>
+                        <span style="font-size: 0.9rem;">Fat Tummy makes everything sound healthy</span>
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                        <strong style="color: #333;">Admin Panel</strong><br>
+                        <span style="font-size: 0.9rem;">Control the chaos from behind the scenes</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; border: 2px solid #e9edf2;">
+                <h4 style="color: #333; margin: 0 0 0.5rem 0; font-size: 1rem;">Tech Stack:</h4>
+                <p style="color: #666; margin: 0; font-size: 0.9rem; line-height: 1.6;">
+                    Python Flask, PostgreSQL, Redis, WebSockets, Canvas API, and an Ollama AI that lives on Google Cloud (costing us a fortune).
+                </p>
+            </div>
+
+            <p style="color: #999; font-size: 0.85rem; margin-top: 1.5rem; text-align: center; font-style: italic;">
+                KdG Integratieproject 3 - Where we learned that building a kiosk is harder than using one.
+            </p>
+            
+            <button class="btn-close">Close & Order Something</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/popups.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/hiddenroute.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Boot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='boot.css') }}">
+</head>
+<body>
+    <div class="boot-container">
+        <div class="logo-section">
+            <div class="system-logo">
+                <div class="logo-icon"></div>
+            </div>
+        </div>
+
+        <h1>Welcome</h1>
+        <p>Select a mode to continue</p>
+
+        <div class="boot-options">
+            <a href="{{ url_for('landing') }}" class="boot-option">
+                <div class="option-icon kiosk-icon"></div>
+                <div class="option-label">Kiosk Mode</div>
+                <div class="option-description">Start the ordering interface</div>
+            </a>
+
+            <a href="{{ url_for('game') }}" class="boot-option">
+                <div class="option-icon game-icon"></div>
+                <div class="option-label">Game Mode</div>
+                <div class="option-description">Start the game application</div>
+            </a>
+        </div>
+
+        <div class="boot-footer">
+            <p>Press an option to start</p>
+        </div>
+    </div>
+</body>
+</html>

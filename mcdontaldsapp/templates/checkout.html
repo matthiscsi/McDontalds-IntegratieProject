@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDontald's - Checkout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='checkout.css') }}">
+</head>
+<body>
+    <div class="decorative-element top-left"></div>
+    <div class="decorative-element bottom-right"></div>
+
+    <div class="header">
+        <div class="mcdonalds-logo">
+            <div class="golden-arches">M</div>
+        </div>
+        <div class="header-content">
+            <h1>Your Order</h1>
+            <p>Review your items and proceed to payment</p>
+        </div>
+    </div>
+
+    <div class="checkout-container">
+        <div class="cart-items">
+            <h2>Ordered Items</h2>
+            <div id="cart-items-list">
+
+            </div>
+            
+            <div class="empty-cart" id="empty-cart" style="display: none;">
+                <div class="empty-cart-icon">🛒</div>
+                <h3>Your cart is empty</h3>
+                <p>Add some delicious McDontald's items to continue!</p>
+                <a href="/menu" class="back-to-menu">Back to Menu</a>
+            </div>
+        </div>
+
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            
+            <div class="order-type-selection">
+                <h4>Selected order type</h4>
+                <p id="order-type-note" class="order-type-note"></p> <!-- nieuw -->
+                <div class="order-type-options">
+                    <div class="order-type-option selected" data-type="dinein">
+                        <div class="icon"></div>
+                        <div class="label">Dine In</div>
+                    </div>
+                    <div class="order-type-option" data-type="takeaway">
+                        <div class="icon"></div>
+                        <div class="label">Take Away</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-totals">
+                <div class="order-total-row">
+                    <span>Subtotal</span>
+                    <span class="price" id="subtotal">€0,00</span>
+                </div>
+                <div class="order-total-row">
+                    <span>VAT (6%)</span>
+                    <span class="price" id="tax">€0,00</span>
+                </div>
+                <div class="order-total-row">
+                    <span>Total</span>
+                    <span class="price" id="total">€0,00</span>
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <h4>Payment Method</h4>
+                <div class="payment-options">
+                    <div class="payment-option selected" data-method="card">
+                        <div class="label">Card</div>
+                    </div>
+                    <div class="payment-option" data-method="cash">
+                        <div class="label">Cash</div>
+                    </div>
+                    <div class="payment-option" data-method="mobile">
+                        <div class="label">Mobile</div>
+                    </div>
+                    <div class="payment-option" data-method="apple">
+                        <div class="label">Apple Pay</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-actions">
+                <button class="btn-primary" id="place-order" disabled>
+                    Place Order
+                </button>
+                <a href="/menu" class="btn-secondary">Back to Menu</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-modal" id="success-modal">
+        <div class="modal-content">
+            <h2>Order Placed!</h2>
+            <p>Your order is being prepared. You'll get a notification when it's ready.</p>
+            <p class="order-number">Order Number: <span id="order-number">-</span></p>
+            <button class="modal-btn" onclick="window.location.href='/landing'">Back to Home</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+</body>
+</html>

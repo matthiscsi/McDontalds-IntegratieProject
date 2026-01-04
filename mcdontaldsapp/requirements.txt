@@ -1,0 +1,21 @@
+# Web Framework
+Flask==3.1.2
+Flask-SQLAlchemy==3.1.1
+Flask-SocketIO==5.5.1
+
+# Database
+psycopg2-binary==2.9.11
+SQLAlchemy==2.0.43
+
+# Redis
+redis==6.4.0
+
+# WebSocket Support
+python-socketio==5.14.2
+python-engineio==4.12.3
+
+# Event Handling
+eventlet==0.40.3
+
+# HTTP Client
+requests==2.32.5

@@ -1,0 +1,17 @@
+# /etc/logrotate.d/kiosk
+/home/kiosk/.xsession-errors {
+    size 100k
+    rotate 4
+    compress
+    missingok
+    notifempty
+    create 0640 kiosk kiosk
+}
+/var/log/chromium.log {
+    size 100k
+    rotate 4
+    compress
+    missingok
+    notifempty
+    create 0640 kiosk kiosk
+}

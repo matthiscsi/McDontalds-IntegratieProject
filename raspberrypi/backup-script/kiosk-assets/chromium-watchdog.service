@@ -1,0 +1,13 @@
+[Unit]
+Description=Chromium Watchdog Service
+After=graphical.target
+
+[Service]
+Type=simple
+User=kiosk
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/chromium_watchdog.sh
+Restart=always
+
+[Install]
+WantedBy=graphical.target

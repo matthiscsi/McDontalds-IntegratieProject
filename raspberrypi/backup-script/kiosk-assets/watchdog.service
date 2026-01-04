@@ -1,0 +1,10 @@
+# /etc/systemd/system/watchdog.service
+[Unit]
+Description=Hardware Watchdog
+[Service]
+Type=simple
+ExecStart=/sbin/modprobe bcm2835_wdt
+ExecStartPost=/bin/sh -c 'echo "V" > /dev/watchdog'
+Restart=always
+[Install]
+WantedBy=multi-user.target

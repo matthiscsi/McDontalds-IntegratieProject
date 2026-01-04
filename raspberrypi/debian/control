@@ -1,0 +1,16 @@
+Source: mckiosk-base
+Section: utils
+Priority: optional
+Maintainer: Mc Kiosk Team <maintainer@example.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: mckiosk-base
+Architecture: all
+Depends: ${misc:Depends}, xserver-xorg, xinit, openbox, unclutter, ufw, apparmor, apparmor-utils, chromium | chromium-browser, fbi, wireguard-tools, resolvconf, x11-utils, curl, iputils-ping
+Recommends: watchdog, squid
+Description: Base kiosk configuration (Openbox + Chromium kiosk mode)
+ Provides a locked-down kiosk environment that autologins a kiosk user on tty1,
+ starts X with Openbox, disables screen blanking, and launches Chromium in kiosk mode.
+ Includes services for Chromium watchdog, optional splash screen, and optional read-only root FS on Raspberry Pi.

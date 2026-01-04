@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='hidden.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <h2>Admin Login</h2>
+
+        <input type="password" id="pin" class="pin-display" placeholder="••••" readonly>
+
+        <div class="keypad">
+            <button class="key">1</button>
+            <button class="key">2</button>
+            <button class="key">3</button>
+            <button class="key">4</button>
+            <button class="key">5</button>
+            <button class="key">6</button>
+            <button class="key">7</button>
+            <button class="key">8</button>
+            <button class="key">9</button>
+            <button class="key zero">0</button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-clear" onclick="clearPin()">Clear</button>
+            <button class="btn-login" onclick="checkPin()">Login</button>
+        </div>
+
+        <div class="btn-home-container">
+            <button class="btn-home" type="button" onclick="window.location.href='{{ url_for('landing') }}'">
+                ← Terug
+            </button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/hidden.js') }}"></script>
+</body>
+</html>

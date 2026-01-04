@@ -1,0 +1,48 @@
+# AppArmor profile for Chromium in kiosk mode
+# Place this file at /etc/apparmor.d/usr.bin.chromium-browser
+
+#include <tunables/global>
+
+/profile usr.bin.chromium-browser {
+  #include <abstractions/base>
+  #include <abstractions/X>
+  #include <abstractions/fonts>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/dbus-session>
+
+  /usr/bin/chromium-browser mr,
+  /usr/lib/chromium-browser/** mr,
+  /usr/share/chromium-browser/** r,
+  /etc/chromium-browser/** r,
+  /dev/shm/** rwk,
+  /tmp/** rwk,
+  /proc/** r,
+  /sys/** r,
+  /dev/tty rw,
+  /dev/input/* r,
+  /dev/snd/* rw,
+  /dev/dri/* rw,
+  /var/run/dbus/system_bus_socket rw,
+  /var/tmp/** rwk,
+  /home/kiosk/** rwk,
+
+  deny capability sys_admin,
+  deny capability sys_module,
+  deny capability sys_rawio,
+  deny capability mknod,
+
+  network inet stream,
+  network inet6 stream,
+
+  /tmp/.X11-unix/* rw,
+  /run/user/*/pulse/native rw,
+
+  capability chown,
+  capability setuid,
+  capability setgid,
+
+  signal (send,receive) peer=unconfined,
+
+  flags=(attach_disconnected,mediate_deleted)
+}

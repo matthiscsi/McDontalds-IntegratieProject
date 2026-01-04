@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDontald's Snake Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='game.css') }}">
+</head>
+<body>
+    <div class="game-header">
+        <div class="mcdonalds-logo">
+            <div class="golden-arches">M</div>
+        </div>
+        <div class="header-content">
+            <h1>Snake Game</h1>
+            <p>Have fun and beat the high score!</p>
+        </div>
+    </div>
+
+    <div id="gameModeModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <div id="modeSelection">
+                <h2>Choose Game Mode</h2>
+                
+                <div class="mode-buttons">
+                    <button class="mode-btn solo-btn" onclick="handleModeSelection('solo')">
+                        <h3>Solo Play</h3>
+                        <p>Play alone and beat your high score</p>
+                    </button>
+                    
+                    <button class="mode-btn create-btn" onclick="handleModeSelection('create')">
+                        <h3>Create Game</h3>
+                        <p>Start a new multiplayer game</p>
+                    </button>
+                    
+                    <button class="mode-btn join-btn" onclick="handleModeSelection('join')">
+                        <h3>Join Game</h3>
+                        <p>Join a friend's game with code</p>
+                    </button>
+
+                    <button class="mode-btn leaderboard-menu-btn" onclick="document.getElementById('leaderboardBtn').click()">
+                        <h3> Leaderboard</h3>
+                        <p>View top players and high scores</p>
+                    </button>
+                </div>
+                <div class="modal-actions" style="margin-top: 2rem;">
+                    <button class="modal-btn back-btn" onclick="window.location.href='/'">
+                        ← Back to Home
+                    </button>
+                </div>
+            </div>
+
+            <div id="nameInput" style="display: none;">
+                <h2>Enter Your Name</h2>
+                
+                <div class="input-group">
+                    <label for="playerNameInput">Player Name</label>
+                    <input type="text" id="playerNameInput" placeholder="Enter your name..." maxlength="20">
+                </div>
+                
+                <div id="codeInputGroup" class="input-group" style="display: none;">
+                    <label for="gameCodeInput">Game Code</label>
+                    <input type="text" id="gameCodeInput" placeholder="Enter 6-digit code..." maxlength="6">
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn back-btn" onclick="backToModeSelection()">Back</button>
+                    <button class="modal-btn submit-btn" onclick="handleNameSubmit()">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="multiplayerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Multiplayer</h2>
+            <div id="waitingScreen" style="display: none;">
+                <h3>Waiting for player...</h3>
+                <p>Game Code:</p>
+                <h1 id="gameCodeDisplay"></h1>
+                <p>Share this code with your friend</p>
+            </div>
+            <div id="gameStartScreen" style="display: none;">
+                <h3>Game starting!</h3>
+                <p id="opponentInfo"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="left-panel">
+            <div class="controls">
+                <h3>Actions</h3>
+                <button id="startBtn">Start</button>
+                <button id="stopBtn">Stop</button>
+                <button id="quitBtn">Quit</button>
+            </div>
+            
+            <div class="scoreboard">
+                <h3>Scoreboard</h3>
+                <div class="label">Game Score</div>
+                <div class="score" id="currentScore">0</div>
+                <div class="label">High Score</div>
+                <div class="score" id="highScore">0</div>
+                
+                <button id="leaderboardBtn" class="leaderboard-btn">
+                    View Leaderboard
+                </button>
+            </div>
+        </div>
+
+        <div class="game-right-section">
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+            
+            <div class="touch-controls">
+                <div class="touch-row">
+                    <button class="touch-btn" data-direction="up">▲</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn" data-direction="left">◀</button>
+                    <button class="touch-btn" data-direction="down">▼</button>
+                    <button class="touch-btn" data-direction="right">►</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content">
+            <h2>Leaderboard</h2>
+            <button id="closeModal" class="close-btn">×</button>
+            <div id="leaderboardContent" class="leaderboard-list"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+</body>
+</html>

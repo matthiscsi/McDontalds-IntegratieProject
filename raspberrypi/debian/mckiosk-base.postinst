@@ -1,0 +1,305 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  configure)
+    echo "[mckiosk] Creating users (if missing)"
+    if ! id manager >/dev/null 2>&1; then
+      adduser --disabled-password --gecos "" manager || true
+      usermod -aG sudo manager || true
+    fi
+    if ! id kiosk >/dev/null 2>&1; then
+      adduser --disabled-password --gecos "" kiosk || true
+      usermod -aG video,input,tty kiosk || true
+    fi
+    # Set default passwords (requested): both manager and kiosk -> 'kiosk'
+    echo "manager:kiosk" | chpasswd || true
+    echo "kiosk:kiosk" | chpasswd || true
+    # Ensure kiosk shell
+    usermod -s /bin/bash kiosk || true
+    # Remove kiosk from sudo if present
+    if id -nG kiosk 2>/dev/null | tr ' ' '\n' | grep -qx sudo; then
+      deluser kiosk sudo || true
+    fi
+
+    echo "[mckiosk] Configure getty autologin"
+    mkdir -p /etc/systemd/system/getty@tty1.service.d
+    cat > /etc/systemd/system/getty@tty1.service.d/override.conf <<'EOF'
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin kiosk --noclear %I linux
+EOF
+    systemctl daemon-reload || true
+    systemctl enable getty@tty1.service || true
+
+    echo "[mckiosk] Disable desktop display managers to avoid graphical greeters"
+    # Proactively stop and disable common display managers; also mask the generic alias
+    for dm in gdm3 lightdm sddm xdm greetd; do
+      if systemctl is-enabled "$dm" 2>/dev/null; then
+        systemctl disable "$dm" || true
+      fi
+      systemctl stop "$dm" 2>/dev/null || true
+    done
+    # Mask the generic display-manager alias so nothing can claim it
+    systemctl mask display-manager.service 2>/dev/null || true
+    systemctl stop display-manager.service 2>/dev/null || true
+    # Ensure the system boots to console (multi-user) instead of graphical target
+    if systemctl get-default | grep -q '^graphical.target$'; then
+      systemctl set-default multi-user.target || true
+    fi
+
+    echo "[mckiosk] Ensuring 'gast' has limited privileges (no sudo)"
+    if id gast >/dev/null 2>&1; then
+      if id -nG gast 2>/dev/null | tr ' ' '\n' | grep -qx sudo; then
+        deluser gast sudo || true
+        echo "[mckiosk] Removed 'gast' from sudo group"
+      fi
+    fi
+
+    echo "[mckiosk] Configure kiosk X session"
+    # Ensure default target URL config exists (can be changed later by admin)
+    mkdir -p /etc/mckiosk
+    if [ ! -s /etc/mckiosk/target-url ]; then
+      echo "http://192.168.68.186" > /etc/mckiosk/target-url
+    fi
+    mkdir -p /home/kiosk/.config/openbox
+    # .xinitrc
+    cat > /home/kiosk/.xinitrc <<'EOF'
+#!/bin/sh
+exec openbox-session
+EOF
+    chmod +x /home/kiosk/.xinitrc
+    chown kiosk:kiosk /home/kiosk/.xinitrc
+    # No external on-screen keyboard packages or scripts; rely solely on Chromium extension
+    # Cleanup any legacy OSK helper scripts from prior versions
+    rm -f /usr/bin/kiosk-toggle-keyboard.sh /usr/bin/kiosk-keyboard-launcher.sh 2>/dev/null || true
+
+    # Force-install Simple Virtual Keyboard extension for Chromium via managed policy
+    mkdir -p /etc/chromium/policies/managed /etc/chromium-browser/policies/managed || true
+    cat > /etc/chromium/policies/managed/mckiosk.json <<'EOPOL'
+{
+  "ExtensionInstallForcelist": [
+    "cmeanlmbffknccbnkahlnkeaompejbch;https://clients2.google.com/service/update2/crx"
+  ],
+  "ExtensionSettings": {
+    "*": { "installation_mode": "allowed" },
+    "cmeanlmbffknccbnkahlnkeaompejbch": {
+      "installation_mode": "force_installed",
+      "update_url": "https://clients2.google.com/service/update2/crx",
+      "toolbar_pin": "force_pinned",
+      "allow_in_incognito": true
+    },
+    "ecjkcanpimnagobhegghdeeiagffoidk": { "installation_mode": "blocked" },
+    "cjabmkimbcmhhepelfhjhbhonnapiipj": { "installation_mode": "blocked" }
+  }
+}
+EOPOL
+    cp /etc/chromium/policies/managed/mckiosk.json /etc/chromium-browser/policies/managed/mckiosk.json 2>/dev/null || true
+    # No org.onboard gsettings; extension handles keyboard behavior
+    # Openbox autostart
+    cat > /home/kiosk/.config/openbox/autostart <<'EOF'
+xset s off
+xset -dpms
+xset s noblank
+unclutter -idle 0.5 &
+
+# Rely on Chromium extension for on-screen keyboard; do not start any external keyboard
+
+# Determine target URL (can be a bare IP or hostname). Default to local IP if not set.
+TARGET_URL="http://192.168.68.186"
+if [ -s /etc/mckiosk/target-url ]; then
+  TARGET_URL=$(head -n1 /etc/mckiosk/target-url | tr -d '\r')
+fi
+case "$TARGET_URL" in
+  http://*|https://*) ;;
+  *) TARGET_URL="http://$TARGET_URL" ;;
+esac
+
+# Show connecting overlay (non-blocking); auto-closed later
+if command -v xmessage >/dev/null; then
+  xmessage -center -buttons none -nearmouse "Connecting to network..." &
+  XM_PID=$!
+fi
+
+# wait for WireGuard wg0 with no timeout, then for VPN DNS reachability
+if [ -f /etc/wireguard/wg0.conf ]; then
+  until ip link show wg0 >/dev/null 2>&1; do sleep 1; done
+  until ping -c1 -W1 10.8.0.1 >/dev/null 2>&1; do sleep 2; done
+  # Also ensure the target app is reachable over wg0 to avoid 'connection refused'
+  if command -v curl >/dev/null 2>&1; then
+    while true; do
+      if curl -4 --interface wg0 -sS --max-time 3 -o /dev/null "$TARGET_URL"; then
+        break
+      fi
+      rc=$?
+      # Treat cert error (60) as connectivity OK when using raw IP + HTTPS
+      if [ "$rc" = "60" ]; then break; fi
+      sleep 2
+    done
+  fi
+fi
+
+# Close overlay if shown
+if [ -n "${XM_PID:-}" ] && kill -0 "$XM_PID" 2>/dev/null; then
+  kill "$XM_PID" 2>/dev/null || true
+fi
+
+# Launch Chromium in full-screen kiosk mode (no incognito to ensure extension works)
+if command -v chromium-browser >/dev/null; then
+  chromium-browser --no-first-run --noerrdialogs --disable-infobars --start-fullscreen --kiosk --disable-translate --overscroll-history-navigation=0 "$TARGET_URL" &
+elif command -v chromium >/dev/null; then
+  chromium --no-first-run --noerrdialogs --disable-infobars --start-fullscreen --kiosk --disable-translate --overscroll-history-navigation=0 "$TARGET_URL" &
+fi
+
+EOF
+    chown -R kiosk:kiosk /home/kiosk/.config/openbox
+    # No tint2 config used
+    # Ensure startx on tty1
+    if ! grep -q "startx" /home/kiosk/.bash_profile 2>/dev/null; then
+      printf '\nif [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then startx >> /home/kiosk/.xsession-errors 2>&1; fi\n' >> /home/kiosk/.bash_profile
+      chown kiosk:kiosk /home/kiosk/.bash_profile || true
+    fi
+
+  echo "[mckiosk] WireGuard VPN configuration"
+  mkdir -p /etc/wireguard
+  umask 077
+  # Expect config to be provided by admin; support /boot overlay on first boot
+  if [ -f /etc/wireguard/wg0.conf ]; then
+    chmod 600 /etc/wireguard/wg0.conf || true
+    systemctl enable wg-quick@wg0.service || true
+    systemctl start wg-quick@wg0.service || true
+  elif [ -f /boot/wg0.conf ]; then
+    cp /boot/wg0.conf /etc/wireguard/wg0.conf
+    chmod 600 /etc/wireguard/wg0.conf || true
+    systemctl enable wg-quick@wg0.service || true
+    systemctl start wg-quick@wg0.service || true
+  else
+    echo "[mckiosk] No WireGuard config at /etc/wireguard/wg0.conf."
+    echo "          Provide one (mode 600). An example is at /usr/share/mckiosk/wg0.conf.example"
+  fi
+
+  # Keepalive watchdog
+  if [ -f /usr/bin/wg-keepalive.sh ]; then
+    chmod +x /usr/bin/wg-keepalive.sh || true
+  fi
+  systemctl enable wg-keepalive.service || true
+  systemctl start wg-keepalive.service || true
+
+    echo "[mckiosk] Enable services (no start)"
+    # Ensure watchdog script is executable
+    if [ -f /usr/bin/chromium_watchdog.sh ]; then
+      chmod +x /usr/bin/chromium_watchdog.sh || true
+    fi
+    # Let system boot bring these up
+    systemctl enable chromium-watchdog.service || true
+    # Splash only if /boot/splash.png exists; still install unit
+    if [ -f /boot/splash.png ]; then
+      systemctl enable splashscreen.service || true
+    fi
+    # Remount-ro is Pi-only, harmless to enable on Pi
+    if grep -q "Raspberry Pi" /proc/cpuinfo 2>/dev/null; then
+      systemctl enable remount-rootfs-ro.service || true
+    fi
+
+    echo "[mckiosk] Enable pre-session update service"
+  if [ -f /usr/bin/kiosk-preupdate.sh ]; then chmod +x /usr/bin/kiosk-preupdate.sh || true; fi
+    systemctl enable kiosk-preupdate.service || true
+
+    echo "[mckiosk] AppArmor setup"
+    systemctl enable apparmor || true
+    systemctl start apparmor || true
+    # Enable kernel AppArmor for next boot if needed
+    if [ ! -e /sys/module/apparmor/parameters/enabled ] || ! cat /sys/module/apparmor/parameters/enabled 2>/dev/null | grep -qi "^Y\|enforce" ; then
+      CMDLINE=""
+      if [ -f /boot/cmdline.txt ]; then CMDLINE=/boot/cmdline.txt; fi
+      if [ -z "$CMDLINE" ] && [ -f /boot/firmware/cmdline.txt ]; then CMDLINE=/boot/firmware/cmdline.txt; fi
+      if [ -n "$CMDLINE" ]; then
+        if ! grep -q "\bapparmor=1\b" "$CMDLINE"; then
+          sed -i '1 s/$/ apparmor=1 security=apparmor/' "$CMDLINE"
+        fi
+      fi
+    fi
+    # Profile already installed to /etc/apparmor.d by data files
+    if systemctl is-active --quiet apparmor && [ -e /sys/module/apparmor/parameters/enabled ] && cat /sys/module/apparmor/parameters/enabled 2>/dev/null | grep -qi "^Y\|enforce" ; then
+      apparmor_parser -r /etc/apparmor.d/usr.bin.chromium-browser || true
+      aa-enforce /etc/apparmor.d/usr.bin.chromium-browser || true
+    fi
+
+    echo "[mckiosk] UFW baseline"
+    if command -v ufw >/dev/null 2>&1; then
+      ufw --force enable || true
+      ufw default deny incoming || true
+      ufw allow ssh || true
+    fi
+
+    echo "[mckiosk] Ensure SSH service is enabled"
+    systemctl enable ssh || true
+    systemctl start ssh || true
+
+    echo "[mckiosk] Configure Wi-Fi autoconnect (KdG-iDev)"
+    # Unblock Wi-Fi radios if blocked
+    if command -v rfkill >/dev/null 2>&1; then rfkill unblock wifi || true; fi
+    # Prefer NetworkManager (nmcli). Install/start if absent on systems that support it.
+    if command -v nmcli >/dev/null 2>&1; then
+      nmcli radio wifi on || true
+      if nmcli -g NAME connection show 2>/dev/null | grep -Fxq "KdG-iDev"; then
+        nmcli connection modify "KdG-iDev" connection.autoconnect yes || true
+      else
+        nmcli dev wifi connect "KdG-iDev" password "WPU5XTSeTgmVmPKv" name "KdG-iDev" || true
+        nmcli connection modify "KdG-iDev" connection.autoconnect yes || true
+      fi
+    else
+      # Try to install and enable NetworkManager, then connect
+      if command -v apt-get >/dev/null 2>&1; then
+        apt-get update || true
+        DEBIAN_FRONTEND=noninteractive apt-get install -y network-manager || true
+      fi
+      if systemctl list-unit-files | grep -q '^NetworkManager\.service'; then
+        systemctl enable NetworkManager || true
+        systemctl start NetworkManager || true
+      fi
+      if command -v nmcli >/dev/null 2>&1; then
+        nmcli radio wifi on || true
+        nmcli dev wifi connect "KdG-iDev" password "WPU5XTSeTgmVmPKv" name "KdG-iDev" || true
+        nmcli connection modify "KdG-iDev" connection.autoconnect yes || true
+      fi
+    fi
+
+    echo "[mckiosk] Kiosk break-glass tools"
+    if [ -f /usr/bin/kiosk-escape.sh ]; then chmod +x /usr/bin/kiosk-escape.sh || true; fi
+    if [ -f /usr/bin/kiosk-restore.sh ]; then chmod +x /usr/bin/kiosk-restore.sh || true; fi
+    DEFAULT_HASH=$(echo -n 'kioskescape' | sha256sum | awk '{print $1}')
+    if [ ! -f /etc/kiosk-escape.conf ]; then
+      cat > /etc/kiosk-escape.conf <<EOF
+# kiosk-escape config
+# Default values set by package; change in production
+PASS_SHA256="$DEFAULT_HASH"
+CODE_TOKEN="kioskescape"
+EOF
+      chmod 600 /etc/kiosk-escape.conf || true
+      echo "[mckiosk] Created /etc/kiosk-escape.conf with default credentials (password+code = kioskescape)."
+    else
+      # Patch existing config if missing values
+      . /etc/kiosk-escape.conf || true
+      NEED_WRITE=0
+      if [ -z "${PASS_SHA256:-}" ]; then
+        sed -i '/^PASS_SHA256=/d' /etc/kiosk-escape.conf 2>/dev/null || true
+        printf 'PASS_SHA256="%s"\n' "$DEFAULT_HASH" >> /etc/kiosk-escape.conf
+        NEED_WRITE=1
+      fi
+      if [ -z "${CODE_TOKEN:-}" ]; then
+        sed -i '/^CODE_TOKEN=/d' /etc/kiosk-escape.conf 2>/dev/null || true
+        printf 'CODE_TOKEN="%s"\n' "kioskescape" >> /etc/kiosk-escape.conf
+        NEED_WRITE=1
+      fi
+      if [ "$NEED_WRITE" = "1" ]; then
+        chmod 600 /etc/kiosk-escape.conf || true
+        echo "[mckiosk] Updated /etc/kiosk-escape.conf with default credentials (password+code = kioskescape)."
+      fi
+    fi
+  ;;
+esac
+
+#DEBHELPER#
+
+exit 0

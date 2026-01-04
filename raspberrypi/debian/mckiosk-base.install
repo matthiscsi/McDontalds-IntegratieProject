@@ -1,0 +1,15 @@
+backup-script/kiosk-assets/chromium-watchdog.service etc/systemd/system/
+backup-script/kiosk-assets/splashscreen.service etc/systemd/system/
+backup-script/kiosk-assets/remount-rootfs-ro.service etc/systemd/system/
+backup-script/kiosk-assets/kiosk_logrotate etc/logrotate.d/kiosk
+backup-script/kiosk-assets/20auto-upgrades etc/apt/apt.conf.d/
+backup-script/kiosk-assets/50unattended-upgrades etc/apt/apt.conf.d/
+backup-script/kiosk-assets/usr.bin.chromium-browser etc/apparmor.d/
+backup-script/kiosk-assets/chromium_watchdog.sh usr/bin/
+backup-script/kiosk-assets/wg0.conf.example usr/share/mckiosk/
+backup-script/kiosk-assets/wg-keepalive.sh usr/bin/
+backup-script/kiosk-assets/wg-keepalive.service etc/systemd/system/
+backup-script/kiosk-assets/kiosk-escape.sh usr/bin/
+backup-script/kiosk-assets/kiosk-restore.sh usr/bin/
+backup-script/kiosk-assets/kiosk-preupdate.sh usr/bin/
+backup-script/kiosk-assets/kiosk-preupdate.service etc/systemd/system/

@@ -1,0 +1,141 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #fff9f0 0%, #fff 50%, #f8f9fa 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-container {
+    width: 100%;
+    max-width: 1000px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* ===== Table Styling ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+thead {
+    background: #ffc72c;
+    color: #222;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 2px solid #f3f4f6;
+    font-size: 1rem;
+}
+
+tbody tr:hover {
+    background: #fff9f0;
+    transition: background 0.3s ease;
+}
+
+/* ===== Stock Status ===== */
+.in-stock {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.out-stock {
+    color: #ff6b35;
+    font-weight: bold;
+}
+
+/* ===== Buttons ===== */
+button {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: 2px solid #e9edf2;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    border-color: #ffc72c;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+input[type="text"] {
+    width: 70px;
+    padding: 0.4rem;
+    border-radius: 8px;
+    border: 2px solid #e9edf2;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* ===== Back Navigation ===== */
+.navigation {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 2rem;
+    background: #fff;
+    border: 2px solid #e9edf2;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    border-color: #cfd6e0;
+    color: #333;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+}
+
+.back-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover .back-arrow {
+    transform: translateX(-3px);
+}

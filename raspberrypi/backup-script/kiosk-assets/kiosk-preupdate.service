@@ -1,0 +1,13 @@
+[Unit]
+Description=Kiosk pre-session OS update
+DefaultDependencies=no
+After=network-online.target
+Wants=network-online.target
+Before=getty@tty1.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kiosk-preupdate.sh
+
+[Install]
+WantedBy=multi-user.target
